@@ -22,43 +22,43 @@ export class TodosController {
   ) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     this.logger.info('GET /todos - Fetching all todos');
-    const result = this.todosService.findAll();
+    const result = await this.todosService.findAll();
     this.logger.info({ count: result.length }, 'GET /todos - Returned todos');
     return result;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     this.logger.info({ todoId: id }, 'GET /todos/:id - Fetching todo');
-    const result = this.todosService.findOne(id);
+    const result = await this.todosService.findOne(id);
     this.logger.info({ todoId: id }, 'GET /todos/:id - Todo found');
     return result;
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createTodoDto: CreateTodoDto) {
+  async create(@Body() createTodoDto: CreateTodoDto) {
     this.logger.info({ title: createTodoDto.title }, 'POST /todos - Creating new todo');
-    const result = this.todosService.create(createTodoDto);
+    const result = await this.todosService.create(createTodoDto);
     this.logger.info({ todoId: result.id }, 'POST /todos - Todo created');
     return result;
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto) {
+  async update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto) {
     this.logger.info({ todoId: id }, 'PUT /todos/:id - Updating todo');
-    const result = this.todosService.update(id, updateTodoDto);
+    const result = await this.todosService.update(id, updateTodoDto);
     this.logger.info({ todoId: id }, 'PUT /todos/:id - Todo updated successfully');
     return result;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param('id') id: string) {
+  async delete(@Param('id') id: string) {
     this.logger.info({ todoId: id }, 'DELETE /todos/:id - Deleting todo');
-    this.todosService.delete(id);
+    await this.todosService.delete(id);
     this.logger.info({ todoId: id }, 'DELETE /todos/:id - Todo deleted successfully');
   }
 }

@@ -1,8 +1,12 @@
+// Import tracing FIRST, before anything else
+import './tracing';
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
 import { MetricsInterceptor } from './common/metrics/metrics.interceptor';
 import { MetricsService } from './common/metrics/metrics.service';
+import { TracingInterceptor } from './common/tracing/tracing.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -10,9 +14,14 @@ async function bootstrap() {
   // Use Pino logger
   app.useLogger(app.get(Logger));
 
-  // Apply metrics interceptor globally
+  // Get services
   const metricsService = app.get(MetricsService);
-  app.useGlobalInterceptors(new MetricsInterceptor(metricsService));
+
+  // Apply interceptors globally
+  app.useGlobalInterceptors(
+    new TracingInterceptor(),
+    new MetricsInterceptor(metricsService),
+  );
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
@@ -21,6 +30,7 @@ async function bootstrap() {
   logger.log(`Application is running on: http://localhost:${port}`);
   logger.log(`Metrics available at: http://localhost:${port}/metrics`);
   logger.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`OpenTelemetry tracing enabled`);
 }
 
 bootstrap();
